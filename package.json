@@ -1,6 +1,6 @@
 {
   "name": "dao-mysql",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "NodeJS MySQL DAO API, connect MySQL with mysql-dao NodeJS连接访问操作MySQL How to connect mysql use Node.js 如何用Node.js连接访问MySQL",
   "main": "Dao.js",
   "scripts": {
@@ -23,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/fantasylincen/dao-mysql/issues"
   },
-  "homepage": "https://github.com/fantasylincen/dao-mysql#readme"
+  "homepage": "https://github.com/fantasylincen/dao-mysql#readme",
+  "dependencies": {
+    "mysql": "^2.17.1"
+  }
 }
