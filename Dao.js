@@ -126,7 +126,46 @@ function findBetween(tableName, fieldName, from, to, onGet) {
     g()
 
 } 
+/**
+ * 获取表中所有数据
+ * @param {表名} tableName  
+ */
+function getAll(tableName, onGet) {
 
+    var g = function() {
+
+        var pool = mySqlPool.getPool();
+        pool.getConnection(function (err, conn) {
+        
+            if (err) {
+                throw err;
+            }
+           
+    
+            sql = "select * from " + tableName + ";";
+            let param = [];
+            conn.query(sql, param, function (err, rs) {
+                if (err) { 
+                    throw err;
+                }
+                if(rs.length > 0) {
+                    onGet(rs )
+                } else {
+                    onGet(null)
+                } 
+                conn.release();//释放连接池
+            })
+        
+        });
+    }
+
+
+    if(!mySqlPool.hasInit) {
+        mySqlPool.init(this.config)
+    }
+    g()
+
+} 
 
 /**
  * 范围查找, 查找在from-to之间的数据, 包含from和to 
@@ -226,5 +265,6 @@ function questionSymbols(count) {
 exports.get = get;
 exports.save = save;
 exports.find = find;
+exports.getAll = getAll;
 exports.findBetween = findBetween;
 exports.del = del;
