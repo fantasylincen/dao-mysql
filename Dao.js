@@ -15,6 +15,7 @@ function get(tableName, id, onGet) {
         pool.getConnection(function (err, conn) {
 
             if (err) {
+                console.error(err)
                 throw err;
             }
 
@@ -22,7 +23,9 @@ function get(tableName, id, onGet) {
             sql = "select * from " + tableName + " where id = ?;";
             let param = [id];
             conn.query(sql, param, function (err, rs) {
+                conn.release();//释放连接池
                 if (err) {
+                    console.error(err)
                     throw err;
                 }
                 if (rs.length > 0) {
@@ -30,7 +33,6 @@ function get(tableName, id, onGet) {
                 } else {
                     onGet(null)
                 }
-                conn.release();//释放连接池
                 
             })
 
@@ -59,6 +61,7 @@ function del(tableName, fieldName, value) {
         pool.getConnection(function (err, conn) {
 
             if (err) {
+                console.error(err)
                 throw err;
             }
 
@@ -66,10 +69,11 @@ function del(tableName, fieldName, value) {
             sql = "delete from " + tableName + " where " + fieldName + " = ?;";
             let param = [value];
             conn.query(sql, param, function (err, rs) {
+                conn.release();//释放连接池
                 if (err) {
+                    console.error(err)
                     throw err;
                 }
-                conn.release();//释放连接池
             })
 
         });
@@ -99,6 +103,7 @@ function findBetween(tableName, fieldName, from, to, onGet) {
         pool.getConnection(function (err, conn) {
 
             if (err) {
+                console.error(err)
                 throw err;
             }
 
@@ -106,7 +111,9 @@ function findBetween(tableName, fieldName, from, to, onGet) {
             sql = "select * from " + tableName + " where " + fieldName + " >= ? AND " + fieldName + " <= ?;";
             let param = [from, to];
             conn.query(sql, param, function (err, rs) {
+                conn.release();//释放连接池
                 if (err) {
+                    console.error(err)
                     throw err;
                 }
                 if (rs.length > 0) {
@@ -114,7 +121,6 @@ function findBetween(tableName, fieldName, from, to, onGet) {
                 } else {
                     onGet(null)
                 }
-                conn.release();//释放连接池
             })
 
         });
@@ -139,6 +145,7 @@ function getAll(tableName, onGet) {
         pool.getConnection(function (err, conn) {
 
             if (err) {
+                console.error(err)
                 throw err;
             }
 
@@ -146,7 +153,9 @@ function getAll(tableName, onGet) {
             sql = "select * from " + tableName + ";";
             let param = [];
             conn.query(sql, param, function (err, rs) {
+                conn.release();//释放连接池
                 if (err) {
+                    console.error(err)
                     throw err;
                 }
                 if (rs.length > 0) {
@@ -154,7 +163,6 @@ function getAll(tableName, onGet) {
                 } else {
                     onGet(null)
                 }
-                conn.release();//释放连接池
             })
 
         });
@@ -184,6 +192,7 @@ function find(tableName, fieldName, value, onFind) {
         pool.getConnection(function (err, conn) {
 
             if (err) {
+                console.error(err)
                 throw err;
             }
 
@@ -191,7 +200,9 @@ function find(tableName, fieldName, value, onFind) {
             sql = "select * from " + tableName + " where " + fieldName + " = ?;";
             let param = [value];
             conn.query(sql, param, function (err, rs) {
+                conn.release();//释放连接池
                 if (err) {
+                    console.error(err)
                     throw err;
                 }
                 if (rs.length > 0) {
@@ -199,7 +210,6 @@ function find(tableName, fieldName, value, onFind) {
                 } else {
                     onFind(null)
                 }
-                conn.release();//释放连接池
             })
 
         });
@@ -247,6 +257,7 @@ function saves(tableName, dtos, onSave) {
         pool.getConnection(function (err, conn) {
 
             if (err) {
+                console.error(err)
                 throw err;
             }
 
@@ -256,11 +267,13 @@ function saves(tableName, dtos, onSave) {
 
 
             conn.query(saveSq, [values], (err, res) => {
-                if (err)
+                conn.release();//释放连接池
+                if (err) {
+                    console.error(err)
                     throw err
+                }
                 if (onSave != null) onSave(res)
 
-                conn.release();//释放连接池
             });
 
         });
@@ -289,6 +302,7 @@ function save(tableName, dto, onSave) {
         pool.getConnection(function (err, conn) {
 
             if (err) {
+                console.error(err)
                 throw err;
             }
 
@@ -299,11 +313,13 @@ function save(tableName, dto, onSave) {
 
 
             conn.query(saveSq, param, (err, res) => {
-                if (err)
+                conn.release();//释放连接池
+                if (err){
+                    console.error(err)
                     throw err
+                }
                 if (onSave != null) onSave(res)
 
-                conn.release();//释放连接池
             });
 
         });
