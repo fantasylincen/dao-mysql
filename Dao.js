@@ -1,6 +1,6 @@
 var MySqlPool = require('./MySqlPool');
 
-var mySqlPool = new MySqlPool();
+var pool = new MySqlPool();
 
 /**
  * 从表中读取记录
@@ -11,11 +11,11 @@ function get(tableName, id, onGet) {
 
     var g = function () {
 
-        var pool = mySqlPool.getPool();
+        
         pool.getConnection(function (err, conn) {
 
             if (err) {
-                console.error(err)
+                error(err)
                 throw err;
             }
 
@@ -23,9 +23,9 @@ function get(tableName, id, onGet) {
             sql = "select * from " + tableName + " where id = ?;";
             let param = [id];
             conn.query(sql, param, function (err, rs) {
-                conn.release();//释放连接池
+                conn.end();//释放连接池
                 if (err) {
-                    console.error(err)
+                    error(err)
                     throw err;
                 }
                 if (rs.length > 0) {
@@ -38,10 +38,11 @@ function get(tableName, id, onGet) {
 
         });
     }
+    var mysql  = require('mysql');  
+ 
 
-
-    if (!mySqlPool.hasInit) {
-        mySqlPool.init(this.config)
+    if (!pool.hasInit) {
+        pool.init(this.config)
     }
     g()
 
@@ -57,11 +58,11 @@ function del(tableName, fieldName, value) {
 
     var g = function () {
 
-        var pool = mySqlPool.getPool();
+        
         pool.getConnection(function (err, conn) {
 
             if (err) {
-                console.error(err)
+                error(err)
                 throw err;
             }
 
@@ -69,9 +70,9 @@ function del(tableName, fieldName, value) {
             sql = "delete from " + tableName + " where " + fieldName + " = ?;";
             let param = [value];
             conn.query(sql, param, function (err, rs) {
-                conn.release();//释放连接池
+                conn.end();//释放连接池
                 if (err) {
-                    console.error(err)
+                    error(err)
                     throw err;
                 }
             })
@@ -80,8 +81,8 @@ function del(tableName, fieldName, value) {
     }
 
 
-    if (!mySqlPool.hasInit) {
-        mySqlPool.init(this.config)
+    if (!pool.hasInit) {
+        pool.init(this.config)
     }
     g()
 
@@ -99,11 +100,11 @@ function findBetween(tableName, fieldName, from, to, onGet) {
 
     var g = function () {
 
-        var pool = mySqlPool.getPool();
+        
         pool.getConnection(function (err, conn) {
 
             if (err) {
-                console.error(err)
+                error(err)
                 throw err;
             }
 
@@ -111,9 +112,9 @@ function findBetween(tableName, fieldName, from, to, onGet) {
             sql = "select * from " + tableName + " where " + fieldName + " >= ? AND " + fieldName + " <= ?;";
             let param = [from, to];
             conn.query(sql, param, function (err, rs) {
-                conn.release();//释放连接池
+                conn.end();//释放连接池
                 if (err) {
-                    console.error(err)
+                    error(err)
                     throw err;
                 }
                 if (rs.length > 0) {
@@ -127,8 +128,8 @@ function findBetween(tableName, fieldName, from, to, onGet) {
     }
 
 
-    if (!mySqlPool.hasInit) {
-        mySqlPool.init(this.config)
+    if (!pool.hasInit) {
+        pool.init(this.config)
     }
     g()
 
@@ -141,11 +142,11 @@ function getAll(tableName, onGet) {
 
     var g = function () {
 
-        var pool = mySqlPool.getPool();
+        
         pool.getConnection(function (err, conn) {
 
             if (err) {
-                console.error(err)
+                error(err)
                 throw err;
             }
 
@@ -153,9 +154,9 @@ function getAll(tableName, onGet) {
             sql = "select * from " + tableName + ";";
             let param = [];
             conn.query(sql, param, function (err, rs) {
-                conn.release();//释放连接池
+                conn.end();//释放连接池
                 if (err) {
-                    console.error(err)
+                    error(err)
                     throw err;
                 }
                 if (rs.length > 0) {
@@ -169,8 +170,8 @@ function getAll(tableName, onGet) {
     }
 
 
-    if (!mySqlPool.hasInit) {
-        mySqlPool.init(this.config)
+    if (!pool.hasInit) {
+        pool.init(this.config)
     }
     g()
 
@@ -188,11 +189,11 @@ function find(tableName, fieldName, value, onFind) {
 
     var g = function () {
 
-        var pool = mySqlPool.getPool();
+        
         pool.getConnection(function (err, conn) {
 
             if (err) {
-                console.error(err)
+                error(err)
                 throw err;
             }
 
@@ -200,9 +201,9 @@ function find(tableName, fieldName, value, onFind) {
             sql = "select * from " + tableName + " where " + fieldName + " = ?;";
             let param = [value];
             conn.query(sql, param, function (err, rs) {
-                conn.release();//释放连接池
+                conn.end();//释放连接池
                 if (err) {
-                    console.error(err)
+                    error(err)
                     throw err;
                 }
                 if (rs.length > 0) {
@@ -216,13 +217,21 @@ function find(tableName, fieldName, value, onFind) {
     }
 
 
-    if (!mySqlPool.hasInit) {
-        mySqlPool.init(this.config)
+    if (!pool.hasInit) {
+        pool.init(this.config)
     }
     g()
 
 }
+function error(err) {
+    if(err.sql != null) {
 
+        if(err.sql.length > 1000){
+            err.sql = err.sql.substring(0, 1000) + "......"
+        }
+    }
+    console.error(err)
+}
 /**
  * 批量保存
  * @param {数据} dtos : array  
@@ -253,11 +262,11 @@ function saves(tableName, dtos, onSave) {
 
     var g = function () {
 
-        var pool = mySqlPool.getPool();
+        
         pool.getConnection(function (err, conn) {
 
             if (err) {
-                console.error(err)
+                error(err)
                 throw err;
             }
 
@@ -267,9 +276,9 @@ function saves(tableName, dtos, onSave) {
 
 
             conn.query(saveSq, [values], (err, res) => {
-                conn.release();//释放连接池
+                conn.end();//释放连接池 
                 if (err) {
-                    console.error(err)
+                    error(err)
                     throw err
                 }
                 if (onSave != null) onSave(res)
@@ -282,8 +291,8 @@ function saves(tableName, dtos, onSave) {
 
 
 
-    if (!mySqlPool.hasInit) {
-        mySqlPool.init(this.config)
+    if (!pool.hasInit) {
+        pool.init(this.config)
     }
     g()
 }
@@ -298,11 +307,11 @@ function save(tableName, dto, onSave) {
 
     var g = function () {
 
-        var pool = mySqlPool.getPool();
+        
         pool.getConnection(function (err, conn) {
 
             if (err) {
-                console.error(err)
+                error(err)
                 throw err;
             }
 
@@ -313,9 +322,9 @@ function save(tableName, dto, onSave) {
 
 
             conn.query(saveSq, param, (err, res) => {
-                conn.release();//释放连接池
+                conn.end();//释放连接池
                 if (err){
-                    console.error(err)
+                    error(err)
                     throw err
                 }
                 if (onSave != null) onSave(res)
@@ -326,8 +335,8 @@ function save(tableName, dto, onSave) {
     }
 
 
-    if (!mySqlPool.hasInit) {
-        mySqlPool.init(this.config)
+    if (!pool.hasInit) {
+        pool.init(this.config)
     }
     g()
 }
