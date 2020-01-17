@@ -38,13 +38,178 @@ function get(tableName, id, onGet) {
 
         });
     }
-    var mysql  = require('mysql');  
+
+    if (!pool.hasInit) {
+        pool.init(this.config)
+    }
+    g()
+
+}
+
+
+/**
+ * 从表中读取记录(同步读取)
+ * @param {表名} tableName 
+ * @param {id} id 
+ */
+function getSync(tableName, id) {
+
+    if (!pool.hasInit) {
+        pool.init(this.config)
+    }
+
+    pm = new Promise(( resolve, reject ) => {
+
+        pool.getConnection(function (err, conn) {
+
+            if (err) {
+                reject( err )
+            } else {
+
+                sql = "select * from " + tableName + " where id = ?;";
+                let param = [id];
+                conn.query(sql, param, function (err, rs) {
+                    conn.end();//释放连接池
+                    if (err) {
+                        reject( err ) 
+                    } else if (rs.length > 0) {
+                        resolve(rs[0])
+                    } else {
+                        resolve(null)
+                    }
+                    
+                })
+
+            
+            }
+
+        });
+    })
+ 
+    return pm
+}
+
+
+
+
+/**
+ * 从表中读取记录, 多个主键 比如 getByKeys("User", {name:"zs", age:"12"}, onGetFunction)
+ * @param {表名} tableName 
+ * @param {id} ids 
+ */
+function getByKeys(tableName, ids, onGet) {
+
+    var g = function () {
+
+        
+        pool.getConnection(function (err, conn) {
+
+            if (err) {
+                error(err)
+                throw err;
+            }
+
+            var ks = Object.keys(ids)
+            var values = []
+
+            ks.forEach(k => {
+                values.push(ids[k])
+            });
+
+            var wheres = ""
+            for (let ii = 0; ii < ks.length; ii++) {
+                const k = ks[ii];
+                if(!isLast)
+                    wheres += k + " = ? AND "
+                else
+                    wheres += k + " = ?;"
+            }
+
+            sql = "select * from " + tableName + " where " + wheres;
+           
+            conn.query(sql, values, function (err, rs) {
+                conn.end();//释放连接池
+                if (err) {
+                    error(err)
+                    throw err;
+                }
+                if (rs.length > 0) {
+                    onGet(rs[0])
+                } else {
+                    onGet(null)
+                }
+                
+            })
+
+        });
+    } 
  
 
     if (!pool.hasInit) {
         pool.init(this.config)
     }
     g()
+
+}
+
+/**
+ * 同步获取
+ * 从表中读取记录, 多个主键 比如 getByKeys("User", {name:"zs", age:"12"}, onGetFunction) 
+ * @param {表名} tableName 
+ * @param {id} ids 
+ */
+function getByKeysSync(tableName, ids) {
+
+
+    if (!pool.hasInit) {
+        pool.init(this.config)
+    }
+
+    pm = new Promise(( resolve, reject ) => {
+
+        pool.getConnection(function (err, conn) { 
+
+            if (err) {
+                reject(err)
+                return
+            }
+
+            var ks = Object.keys(ids)
+            var values = []
+
+            ks.forEach(k => {
+                values.push(ids[k])
+            });
+
+            var wheres = ""
+            for (let ii = 0; ii < ks.length; ii++) {
+                const k = ks[ii];
+                isLast = ii == ks.length - 1
+                if(!isLast)
+                    wheres += k + " = ? AND "
+                else
+                    wheres += k + " = ?;"
+            }
+
+            sql = "select * from " + tableName + " where " + wheres;
+           
+            conn.query(sql, values, function (err, rs) {
+                conn.end();//释放连接池
+                if (err) {
+                    reject(err)
+                    return
+                }
+                if (rs.length > 0) {
+                    resolve(rs[0])
+                } else {
+                    resolve(null)
+                } 
+            }) 
+        });
+    })
+ 
+    return pm
+ 
 
 }
 
@@ -85,6 +250,47 @@ function del(tableName, fieldName, value) {
         pool.init(this.config)
     }
     g()
+
+}
+
+
+
+/**
+ * 删除某条记录
+ * @param {表名} tableName  
+ * @param {列名} fieldName  
+ * @param {值} value 
+ */
+function delSync(tableName, fieldName, value) {
+
+
+    if (!pool.hasInit) {
+        pool.init(this.config)
+    }
+    
+    pm = new Promise(( resolve, reject ) => {
+    
+        pool.getConnection(function (err, conn) {
+            if (err) {
+                reject(err)
+                return
+            }
+
+            sql = "delete from " + tableName + " where " + fieldName + " = ?;";
+            let param = [value];
+            conn.query(sql, param, function (err, rs) {
+                conn.end();//释放连接池
+                if (err) {
+                    reject(err) 
+                } else {
+                    resolve(rs)
+                }
+            })
+
+        });
+    })
+    
+    return pm
 
 }
 
@@ -134,6 +340,53 @@ function findBetween(tableName, fieldName, from, to, onGet) {
     g()
 
 }
+
+
+
+/**
+ * 范围查找, 查找在from-to之间的数据, 包含from和to (同步查询)
+ * @param {表名} tableName 
+ * @param {字段名} fieldName 
+ * @param {要查找的字段值} from 
+ * @param {要查找的字段值} to 
+ */
+function findBetweenSync(tableName, fieldName, from, to, onGet) {
+
+
+    if (!pool.hasInit) {
+        pool.init(this.config)
+    }
+
+    pm = new Promise(( resolve, reject ) => {
+ 
+        pool.getConnection(function (err, conn) {
+ 
+            if (err) {
+                reject(err)
+                return
+            }
+ 
+            sql = "select * from " + tableName + " where " + fieldName + " >= ? AND " + fieldName + " <= ?;";
+            let param = [from, to];
+            conn.query(sql, param, function (err, rs) {
+                conn.end();//释放连接池
+                if (err) {
+                    reject(err)
+                    return
+                }
+                if (rs.length > 0) {
+                    resolve(rs)
+                } else {
+                    resolve(null)
+                }
+            })
+         });
+    })
+
+    return pm
+
+}
+
 /**
  * 获取表中所有数据
  * @param {表名} tableName  
@@ -177,11 +430,59 @@ function getAll(tableName, onGet) {
 
 }
 
+
+
 /**
- * 范围查找, 查找在from-to之间的数据, 包含from和to 
+ * 获取所有 (同步查询)
+ * @param {*} tableName 表名 
+ * 
+ */
+function getAllSync(tableName) {
+
+
+    if (!pool.hasInit) {
+        pool.init(this.config)
+    }
+
+    pm = new Promise(( resolve, reject ) => {
+ 
+        pool.getConnection(function (err, conn) {
+ 
+
+            if (err) {
+                reject(err)
+                return
+            }
+
+
+            sql = "select * from " + tableName + ";";
+            let param = [];
+            conn.query(sql, param, function (err, rs) {
+                conn.end();//释放连接池
+                if (err) {
+                    reject(err)
+                    return
+                }
+                if (rs.length > 0) {
+                    resolve(rs)
+                } else {
+                    resolve(null)
+                }
+            })
+         });
+    })
+
+    return pm
+
+}
+
+
+
+/**
+ * 按值查找 
  * @param {*} tableName 表名
  * @param {*} fieldName 字段名
- * @param {*} from  要查找的字段值
+ * @param {*} value  要查找的字段值
  * @param {*} onFind 回调
  * 
  */
@@ -223,6 +524,57 @@ function find(tableName, fieldName, value, onFind) {
     g()
 
 }
+
+
+
+/**
+ * 按值查找 (同步查询)
+ * @param {*} tableName 表名
+ * @param {*} fieldName 字段名
+ * @param {*} value  要查找的字段值
+ * 
+ */
+function findSync(tableName, fieldName, value) {
+
+
+    if (!pool.hasInit) {
+        pool.init(this.config)
+    }
+
+    pm = new Promise(( resolve, reject ) => {
+ 
+        pool.getConnection(function (err, conn) {
+ 
+
+            if (err) {
+                reject(err)
+                return
+            }
+
+
+            sql = "select * from " + tableName + " where " + fieldName + " = ?;";
+            let param = [value];
+            conn.query(sql, param, function (err, rs) {
+                conn.end();//释放连接池
+                if (err) {
+                    reject(err)
+                    return
+                }
+                if (rs.length > 0) {
+                    resolve(rs)
+                } else {
+                    resolve(null)
+                }
+            }) 
+         });
+    })
+
+    return pm
+
+}
+
+
+
 function error(err) {
     if(err.sql != null) {
 
@@ -300,6 +652,108 @@ function saves(tableName, dtos, onSave) {
 
 
 /**
+ * 批量保存(同步)
+ * @param {数据} dtos
+ */
+function savesSync(tableName, dtos) {
+
+ 
+    if (!pool.hasInit) {
+        pool.init(this.config)
+    }
+    
+    pm = new Promise(( resolve, reject ) => {
+    
+        pool.getConnection(function (err, conn) {
+    
+
+            if (err) {
+                reject(err)
+                return
+            } 
+
+            if (dtos.length == 0) {
+                resolve([])
+                return
+            }
+        
+        
+            var toArray = function (ks, dto) {
+                var rt = []
+                ks.forEach(key => {
+                    rt.push(dto[key])
+                });
+                return rt
+            }
+        
+            var buildValues = function (ks, dtos) {
+                var rt = []
+                dtos.forEach(dto => {
+                    rt.push(toArray(ks, dto))
+                });
+                return rt
+            } 
+ 
+            var ks = Object.keys(dtos[0])
+            var values = buildValues(ks, dtos)
+            const saveSq = 'replace into ' + tableName + ' (' + ks.join(",") + ') values ?';
+
+            conn.query(saveSq, [values], (err, res) => {
+                conn.end();//释放连接池 
+                if (err) {
+                    reject(err)
+                    return
+                }
+                resolve(res)
+            }); 
+        });
+    })
+    
+    return pm
+}
+
+
+/**
+ * 保存单个(同步)
+ * @param {数据} dto  
+ */
+function saveSync(tableName, dto) {
+
+    if (!pool.hasInit) {
+        pool.init(this.config)
+    }
+    
+    pm = new Promise(( resolve, reject ) => {
+    
+        pool.getConnection(function (err, conn) {
+    
+            if (err) {
+                reject(err)
+                return
+            }
+
+            var param = Object.values(dto)
+            var ks = Object.keys(dto)
+            var symbols = questionSymbols(param.length)
+            const saveSq = 'replace into ' + tableName + ' (' + ks.join(",") + ') values(' + symbols + ')';
+
+
+            conn.query(saveSq, param, (err, res) => {
+                conn.end();//释放连接池
+                if (err){
+                    reject(err) 
+                } else {
+                    resolve(res)
+                    // console.info("save1:" + JSON.stringify(dto))
+                }
+            });
+        });
+    })
+    
+    return pm
+}
+
+/**
  * 从表中读取记录
  * @param {数据} dto  
  */
@@ -354,9 +808,19 @@ function questionSymbols(count) {
 }
 
 exports.get = get;
+exports.getByKeys = getByKeys;
 exports.save = save;
 exports.saves = saves;
 exports.find = find;
 exports.getAll = getAll;
 exports.findBetween = findBetween;
 exports.del = del;
+
+exports.getSync = getSync;
+exports.getByKeysSync = getByKeysSync;
+exports.saveSync = saveSync;
+exports.savesSync = savesSync;
+exports.findSync = findSync;
+exports.getAllSync = getAllSync;
+exports.findBetweenSync = findBetweenSync;
+exports.delSync = delSync;
