@@ -119,6 +119,7 @@ function getByKeys(tableName, ids, onGet) {
             var wheres = ""
             for (let ii = 0; ii < ks.length; ii++) {
                 const k = ks[ii];
+                isLast = ii == ks.length - 1
                 if(!isLast)
                     wheres += k + " = ? AND "
                 else
@@ -326,7 +327,7 @@ function findBetween(tableName, fieldName, from, to, onGet) {
                 if (rs.length > 0) {
                     onGet(rs)
                 } else {
-                    onGet(null)
+                    onGet([])
                 }
             })
 
@@ -377,7 +378,7 @@ function findBetweenSync(tableName, fieldName, from, to, onGet) {
                 if (rs.length > 0) {
                     resolve(rs)
                 } else {
-                    resolve(null)
+                    resolve([])
                 }
             })
          });
@@ -415,7 +416,7 @@ function getAll(tableName, onGet) {
                 if (rs.length > 0) {
                     onGet(rs)
                 } else {
-                    onGet(null)
+                    onGet([])
                 }
             })
 
@@ -466,7 +467,7 @@ function getAllSync(tableName) {
                 if (rs.length > 0) {
                     resolve(rs)
                 } else {
-                    resolve(null)
+                    resolve([])
                 }
             })
          });
@@ -510,7 +511,7 @@ function find(tableName, fieldName, value, onFind) {
                 if (rs.length > 0) {
                     onFind(rs)
                 } else {
-                    onFind(null)
+                    onFind([])
                 }
             })
 
@@ -563,7 +564,7 @@ function findSync(tableName, fieldName, value) {
                 if (rs.length > 0) {
                     resolve(rs)
                 } else {
-                    resolve(null)
+                    resolve([])
                 }
             }) 
          });

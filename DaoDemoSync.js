@@ -32,7 +32,7 @@ async function startTest() {
 	console.log("getByKeysSync:" + JSON.stringify(u))
 
 	//查找User表中 age == 18 的所有记录
-	us = await dao.findSync("User", "age", 18)
+	us = await dao.findSync("User", "age", 151)
 	for(var i in us) {
 		var u = us[i]
 		console.info("findSync:" + JSON.stringify(u)) 

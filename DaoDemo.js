@@ -10,10 +10,24 @@ dao.config = {
 }
 
 
+// 逐个保存3个用户
 function save3Users() {
 	save("u1", 12, "lincen1")
 	save("u2", 20, "lincen2")
 	save("u3", 18, "lincen3")
+}
+
+// 批量保存3个用户
+function saves3Users() {
+
+	dtos = [
+		{id:"u1", age:12, name:"lincen1"}, 
+		{id:"u2", age:20, name:"lincen2"}, 
+		{id:"u3", age:18, name:"lincen3"}
+	]
+	// 批量保存
+	dao.saves("User", dtos)
+	console.log("saves3Users" )
 }
 
 function save(id, age, name) {
@@ -26,35 +40,51 @@ function save(id, age, name) {
 	
 	//把数据保存到User表中
 	dao.save("User", dto)
+	console.log("save1User" )
 }
 
 // 生成3条测试记录
 save3Users()
 
-//获取表中id为u123123的用户信息
+// 批量保存3个用户
+saves3Users()
+
+//获取表中id为u1的用户信息
 dao.get("User", "u1", function(u) {
-    console.info("---	get	---")
-    console.info(u.id + ", " + u.name + ", " + u.age) 
+	console.info("get: " + u.id + ", " + u.name + ", " + u.age) 
+})
+
+//获取表中 id = u1 且age = 12的用户信息 (联合主键查询)
+ids = {id:"u1", age:12}
+dao.getByKeys("User", ids, function(u) { 
+	console.info("getByKeys: " + u.id + ", " + u.name + ", " + u.age) 
 })
 
 //查找User表中 age == 18 的所有记录
-dao.find("User", "age", 18, function(us) {
-    console.info("---	find	---")
+dao.find("User", "age", 18, function(us) { 
 	for(var i in us) {
 		var u = us[i]
-		console.info(u.id + ", " + u.name + ", " + u.age) 
+		console.info("find: " + u.id + ", " + u.name + ", " + u.age) 
+	}
+})
+
+//查找User表所有记录
+dao.getAll("User", function(us) { 
+	for(var i in us) {
+		var u = us[i]
+		console.info("getAll: " + u.id + ", " + u.name + ", " + u.age) 
 	}
 })
 
 //查找User表中 age >= 10 且 age <= 20 的所有记录
-dao.findBetween("User", "age", 15, 20, function(us) {
-    console.info("---	findBetween	---")
+dao.findBetween("User", "age", 15, 20, function(us) { 
 	for(var i in us) {
 		var u = us[i]
-		console.info(u.id + ", " + u.name + ", " + u.age) 
+		console.info("findBetween: " + u.id + ", " + u.name + ", " + u.age) 
 	} 
 })
 
 //删除User表中id为u123123的数据
 dao.del("User", "id", "u1") 
+console.log("delete")
  
