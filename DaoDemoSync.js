@@ -57,6 +57,43 @@ async function startTest() {
 	rs = await dao.delSync("User", "id", "u1") 
 	console.info("delSync:" + JSON.stringify(rs)) 
 	
+
+	var ss = []
+	for (let index = 10; index < 35; index++) {
+		ss.push({id:"u" + index, age:19, name:"lincen" + index})
+	}
+
+	// 批量保存
+	await dao.savesSync("User", ss)
+	console.info("savesSync:" + ss.length + " users") 
+
+
+	//分页查找
+    var page = 1
+    while(true) {
+		var countPerPage = 10
+		var dtos = await dao.getPageSync("User", page, countPerPage)
+		console.info("getPageSync:" + dtos.length) 
+        if(dtos.length < countPerPage) {
+            break
+		} 
+		page++
+	}
+
+	
+	//分页查找, 按age排序
+    var page = 1
+    while(true) {
+		var countPerPage = 10
+		var dtos = await dao.getPageSortBySync("User", "age", true, page, countPerPage)
+		console.info("getPageSortBySync:" + dtos.length) 
+        if(dtos.length < countPerPage) {
+            break
+		} 
+		page++
+	}
+	
+
 }
 
 startTest()

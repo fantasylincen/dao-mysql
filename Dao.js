@@ -528,6 +528,107 @@ function find(tableName, fieldName, value, onFind) {
 
 
 
+
+/**
+ * 分页查找
+ * @param {*} tableName 表名
+ * @param {*} page 第几页
+ * @param {*} countPerPage  每页数量
+ * 
+ * return 如果没有数据返回空数组
+ * 
+ */
+function getPage(tableName, page, countPerPage, onFind) {
+
+    var g = function () {
+        
+        pool.getConnection(function (err, conn) {
+
+            if (err) {
+                error(err)
+                throw err;
+            }
+
+
+            sql = "select * from " + tableName + " LIMIT ?, ?;"
+            let param = [(page - 1) * countPerPage, countPerPage];
+            conn.query(sql, param, function (err, rs) {
+                conn.end();//释放连接池
+                if (err) {
+                    error(err)
+                    throw err;
+                }
+                if (rs.length > 0) {
+                    onFind(rs)
+                } else {
+                    onFind([])
+                }
+            })
+
+        });
+    }
+
+
+    if (!pool.hasInit) {
+        pool.init(this.config)
+    }
+    g()
+
+}
+
+
+/**
+ * 分页查找, 以fieldName排序
+ * @param {*} tableName 表名
+ * @param {*} fieldName 字段名
+ * @param {*} isAsc 是否升序
+ * 
+ * @param {*} page 第几页
+ * @param {*} countPerPage  每页数量
+ * 
+ * return 如果没有数据返回空数组
+ * 
+ */
+function getPageSortBy(tableName, fieldName, isAsc, page, countPerPage, onFind) {
+
+    var g = function () {
+        
+        pool.getConnection(function (err, conn) {
+
+            if (err) {
+                error(err)
+                throw err;
+            }
+
+
+            sql = "select * from " + tableName + " ORDER BY `" + fieldName + "` " + (isAsc ? "ASC" :"DESC") + " LIMIT ?, ?;"
+            let param = [(page - 1) * countPerPage, countPerPage];
+            conn.query(sql, param, function (err, rs) {
+                conn.end();//释放连接池
+                if (err) {
+                    error(err)
+                    throw err;
+                }
+                if (rs.length > 0) {
+                    onFind(rs)
+                } else {
+                    onFind([])
+                }
+            })
+
+        });
+    }
+
+
+    if (!pool.hasInit) {
+        pool.init(this.config)
+    }
+    g()
+
+}
+
+
+
 /**
  * 按值查找 (同步查询)
  * @param {*} tableName 表名
@@ -555,6 +656,110 @@ function findSync(tableName, fieldName, value) {
 
             sql = "select * from " + tableName + " where " + fieldName + " = ?;";
             let param = [value];
+            conn.query(sql, param, function (err, rs) {
+                conn.end();//释放连接池
+                if (err) {
+                    reject(err)
+                    return
+                }
+                if (rs.length > 0) {
+                    resolve(rs)
+                } else {
+                    resolve([])
+                }
+            }) 
+         });
+    })
+
+    return pm
+
+}
+
+
+
+
+
+/**
+ * 分页查找 (同步查询)
+ * @param {*} tableName 表名
+ * @param {*} page 第几页
+ * @param {*} countPerPage  每页数量
+ * 
+ * return 如果没有数据返回空数组
+ * 
+ */
+function getPageSync(tableName, page, countPerPage) {
+
+
+    if (!pool.hasInit) {
+        pool.init(this.config)
+    }
+
+    pm = new Promise(( resolve, reject ) => {
+ 
+        pool.getConnection(function (err, conn) {
+ 
+
+            if (err) {
+                reject(err)
+                return
+            }
+
+            sql = "select * from " + tableName + " LIMIT ?, ?;"
+            let param = [(page - 1) * countPerPage, countPerPage];
+
+            conn.query(sql, param, function (err, rs) {
+                conn.end();//释放连接池
+                if (err) {
+                    reject(err)
+                    return
+                }
+                if (rs.length > 0) {
+                    resolve(rs)
+                } else {
+                    resolve([])
+                }
+            }) 
+         });
+    })
+
+    return pm
+
+}
+
+ 
+/**
+ * 分页查找, 以fieldName排序 (同步查询)
+ * @param {*} tableName 表名
+ * @param {*} fieldName 字段名
+ * @param {*} isAsc 是否升序
+ * 
+ * @param {*} page 第几页
+ * @param {*} countPerPage  每页数量
+ * 
+ * return 如果没有数据返回空数组
+ * 
+ */
+function getPageSortBySync(tableName, fieldName, isAsc, page, countPerPage) {
+
+
+    if (!pool.hasInit) {
+        pool.init(this.config)
+    }
+
+    pm = new Promise(( resolve, reject ) => {
+ 
+        pool.getConnection(function (err, conn) {
+ 
+
+            if (err) {
+                reject(err)
+                return
+            }
+
+            sql = "select * from " + tableName + " ORDER BY `" + fieldName + "` " + (isAsc ? "ASC" :"DESC") + " LIMIT ?, ?;" 
+            let param = [(page - 1) * countPerPage, countPerPage];
+
             conn.query(sql, param, function (err, rs) {
                 conn.end();//释放连接池
                 if (err) {
@@ -813,6 +1018,8 @@ exports.getByKeys = getByKeys;
 exports.save = save;
 exports.saves = saves;
 exports.find = find;
+exports.getPage = getPage;
+exports.getPageSortBy = getPageSortBy;
 exports.getAll = getAll;
 exports.findBetween = findBetween;
 exports.del = del;
@@ -822,6 +1029,8 @@ exports.getByKeysSync = getByKeysSync;
 exports.saveSync = saveSync;
 exports.savesSync = savesSync;
 exports.findSync = findSync;
+exports.getPageSync = getPageSync;
+exports.getPageSortBySync = getPageSortBySync;
 exports.getAllSync = getAllSync;
 exports.findBetweenSync = findBetweenSync;
 exports.delSync = delSync;

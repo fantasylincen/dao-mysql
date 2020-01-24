@@ -88,3 +88,35 @@ dao.findBetween("User", "age", 15, 20, function(us) {
 dao.del("User", "id", "u1") 
 console.log("delete")
  
+
+
+
+
+var ss = []
+for (let index = 10; index < 35; index++) {
+	ss.push({id:"u" + index, age:19, name:"lincen" + index})
+}
+
+// 批量保存
+dao.saves("User", ss)
+console.info("saves:" + ss.length + " users") 
+
+
+//分页查找 
+for (let page = 1; page <= 3; page++) { 
+	 
+	var countPerPage = 10
+	dao.getPage("User", page, countPerPage, function (rs) {
+		console.info("getPage:" + rs.length) 
+	}) 
+}
+
+//分页查找, 按age排序
+for (let page = 1; page <= 3; page++) { 
+	 
+	var countPerPage = 10
+	dao.getPageSortBy("User", "age", true, page, countPerPage, function (rs) {
+		console.info("getPageSortBy:" + rs.length) 
+	}) 
+}
+ 
