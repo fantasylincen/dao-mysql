@@ -35,14 +35,14 @@ async function startTest() {
 	us = await dao.findSync("User", "age", 151)
 	for(var i in us) {
 		var u = us[i]
-		console.info("findSync:" + JSON.stringify(u)) 
+		console.info("findSync:" + JSON.stringify(u))
 	}
 	
 	//查找所有记录
 	us = await dao.getAllSync("User")
 	for(var i in us) {
 		var u = us[i]
-		console.info("getAllSync:" + JSON.stringify(u)) 
+		console.info("getAllSync:" + JSON.stringify(u))
 	}
 
 	//查找User表中 age >= 10 且 age <= 20 的所有记录
@@ -50,12 +50,12 @@ async function startTest() {
  
 	for(var i in us) {
 		var u = us[i]
-		console.info("findBetweenSync:" + JSON.stringify(u)) 
-	} 
+		console.info("findBetweenSync:" + JSON.stringify(u))
+	}
 
 	//删除User表中id为u123123的数据
-	rs = await dao.delSync("User", "id", "u1") 
-	console.info("delSync:" + JSON.stringify(rs)) 
+	rs = await dao.delSync("User", "id", "u1")
+	console.info("delSync:" + JSON.stringify(rs))
 	
 
 	var ss = []
@@ -65,7 +65,7 @@ async function startTest() {
 
 	// 批量保存
 	await dao.savesSync("User", ss)
-	console.info("savesSync:" + ss.length + " users") 
+	console.info("savesSync:" + ss.length + " users")
 
 
 	//分页查找
@@ -73,10 +73,10 @@ async function startTest() {
     while(true) {
 		var countPerPage = 10
 		var dtos = await dao.getPageSync("User", page, countPerPage)
-		console.info("getPageSync:" + dtos.length) 
+		console.info("getPageSync:" + dtos.length)
         if(dtos.length < countPerPage) {
             break
-		} 
+		}
 		page++
 	}
 
@@ -86,15 +86,12 @@ async function startTest() {
     while(true) {
 		var countPerPage = 10
 		var dtos = await dao.getPageSortBySync("User", "age", true, page, countPerPage)
-		console.info("getPageSortBySync:" + dtos.length) 
+		console.info("getPageSortBySync:" + dtos.length)
         if(dtos.length < countPerPage) {
             break
-		} 
+		}
 		page++
 	}
-	
-
 }
-
 startTest()
  
