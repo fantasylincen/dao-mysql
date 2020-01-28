@@ -351,7 +351,7 @@ function findBetween(tableName, fieldName, from, to, onGet) {
  * @param {要查找的字段值} from 
  * @param {要查找的字段值} to 
  */
-function findBetweenSync(tableName, fieldName, from, to, onGet) {
+function findBetweenSync(tableName, fieldName, from, to) {
 
 
     if (!pool.hasInit) {
