@@ -4,25 +4,29 @@ class MySqlPool {
     constructor(config) {
         this.config = config
         if (config == null)
-            throw "please set dao.config = {host:'*' user:'*' password:'*' database:'*' port:*}"
-        this.pool = mysql.createPool(config);
+            throw "please set dao.config = {host:'*' user:'*' password:'*' database:'*' port:*}" 
+        this.pool = mysql.createPool(config)
     }
 
     getConnection(callback) {
+        
+        this.pool.getConnection(callback) 
 
-        try {
+        // try {
 
-            var connection = mysql.createConnection(this.config);
+        //     var connection = mysql.createConnection(this.config);
+        //     connection.on("error")
+        //     connection.connect(function (error) {
+                
+        //         callback(error, connection)
+        //     });
 
-            connection.connect();
+        // } catch (err) {
 
-        } catch (err) {
-
-            callback(err, connection)
-            return
-        }
-
-        callback(null, connection)
+        //     callback(err, connection)
+        //     return
+        // }
+ 
     }
 }
 
@@ -46,7 +50,7 @@ class Dao {
 
     _sqlOneResult(sq, param, onGet) {
         this.sql(sq, param, function (rs) {
-            if(onGet == null)
+            if (onGet == null)
                 return
             if (rs.length == 0)
                 onGet(null)
@@ -296,15 +300,17 @@ class Dao {
         self.pool.getConnection(function (err, conn) {
 
             if (err) {
-                self._error(err)
-                throw err;
+                self._error(err) 
+                if(onFind != null) onFind({ error: err })
+                return
             }
 
             conn.query(sql, param, function (err, rs) {
-                conn.end();//释放连接池
+                conn.release();//释放连接池
                 if (err) {
                     self._error(err)
-                    throw err;
+                    if(onFind != null) onFind({ error: err })
+                    return
                 }
 
                 if (onFind == null)
@@ -393,7 +399,7 @@ class Dao {
                 }
 
                 conn.query(sql, param, function (err, rs) {
-                    conn.end();//释放连接池
+                    conn.release();//释放连接池
                     if (err) {
                         reject(err)
                         return
@@ -432,7 +438,7 @@ class Dao {
                 }
 
                 conn.query(sql, param, function (err, r) {
-                    conn.end();//释放连接池
+                    conn.release();//释放连接池
                     if (err) {
                         reject(err)
                         return

@@ -6,7 +6,7 @@ var config = {
 	user: 'tester',
 	password: 'loiqwnltnlz1123',
 	database: 'test',
-	port: '8918'
+	port: '8918' 
 }
 
 const TABLE_NAME = "User"
