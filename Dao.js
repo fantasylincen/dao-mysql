@@ -191,7 +191,7 @@ class Dao {
 
         var sq = "select * from " + tableName + " where " + wheres;
 
-        return this._sqlSync(sq, values)
+        return this.sqlSync(sq, values)
     }
 
     /**
