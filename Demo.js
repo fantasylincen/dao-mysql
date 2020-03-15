@@ -235,6 +235,13 @@ async function startTest() {
 		}
 		page++
 	}
+
+
+	setTimeout(() => {
+
+		//程序结束时, 记得调用dao.end方法, 程序才会完全停止
+		dao.end()
+	}, 1000);
 }
 
 startTest()

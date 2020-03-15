@@ -584,6 +584,9 @@ class Dao {
 
     }
 
+    end() {
+        this.pool.pool.end()
+    }
 
     /**
      * 保存单个(同步)
